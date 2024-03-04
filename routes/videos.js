@@ -24,13 +24,13 @@ router
 		res.send(videoList);
 	})
 	.post((req, res) => {
-		const { title, description } = req.body;
+		const { title, description, image } = req.body;
 
 		const video = {
 			id: uniqid(),
 			title: title,
 			channel: "A very cool channel",
-			image: "import from public",
+			image: image,
 			description: description,
 			views: 0,
 			likes: 0,
