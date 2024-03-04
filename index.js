@@ -10,6 +10,8 @@ const videosRoutes = require("./routes/videos");
 // 	next();
 // });
 
+app.use(express.json());
+
 app.use("/videos", videosRoutes);
 
 app.listen(8080, () => {
