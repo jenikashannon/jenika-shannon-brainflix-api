@@ -3,8 +3,9 @@ const router = express.Router();
 const fs = require("fs");
 const uniqid = require("uniqid");
 
-const videos = JSON.parse(fs.readFileSync("./data/videos.json"));
-console.log(videos[0]);
+const pathToData = "./data/videos.json";
+const videos = JSON.parse(fs.readFileSync(pathToData));
+// console.log(videos[0]);
 
 router
 	.route("/")
@@ -42,7 +43,7 @@ router
 
 		videos.push(video);
 
-		fs.writeFileSync("./data/videos.json", JSON.stringify(videos));
+		writeToDatabase(videos);
 
 		res.status(201).send(video);
 	});
@@ -56,4 +57,32 @@ router.get("/:videoId", (req, res) => {
 	res.send(video);
 });
 
+router.delete("/:videoId/comments/:commentId", (req, res) => {
+	const videoId = req.params.videoId;
+	const commentId = req.params.commentId;
+
+	// find relevant video
+	const videoIndex = videos.findIndex((video) => video.id === videoId);
+
+	const video = videos[videoIndex];
+
+	// find relevant comment
+	const commentIndex = video.comments.findIndex(
+		(comment) => comment.id === commentId
+	);
+
+	const comment = video.comments[commentIndex];
+
+	// remove comment
+	video.comments.splice(commentIndex, 1);
+
+	writeToDatabase(videos);
+
+	res.send(comment);
+});
+
 module.exports = router;
+
+function writeToDatabase(newData) {
+	fs.writeFileSync(pathToData, JSON.stringify(newData));
+}
