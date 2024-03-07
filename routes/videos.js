@@ -4,12 +4,14 @@ const fs = require("fs");
 const uniqid = require("uniqid");
 
 const pathToData = "./data/videos.json";
-const videos = JSON.parse(fs.readFileSync(pathToData));
+
 // console.log(videos[0]);
 
 router
 	.route("/")
 	.get((req, res) => {
+		const videos = readDatabase();
+
 		// get relevant details for each video
 		const videoList = videos.map((video) => {
 			const videoListItem = {
@@ -25,21 +27,9 @@ router
 		res.send(videoList);
 	})
 	.post((req, res) => {
-		const { title, description, image } = req.body;
+		const videos = readDatabase();
 
-		const video = {
-			id: uniqid(),
-			title: title,
-			channel: "A very cool channel",
-			image: image,
-			description: description,
-			views: 0,
-			likes: 0,
-			duration: "2:17",
-			video: "import from public",
-			timestamp: new Date().getTime(),
-			comments: [],
-		};
+		const video = { id: uniqid(), ...req.body };
 
 		videos.push(video);
 
@@ -49,6 +39,7 @@ router
 	});
 
 router.get("/:videoId", (req, res) => {
+	const videos = readDatabase();
 	const videoId = req.params.videoId;
 
 	// find the video with the required video id
@@ -58,6 +49,7 @@ router.get("/:videoId", (req, res) => {
 });
 
 router.delete("/:videoId/comments/:commentId", (req, res) => {
+	const videos = readDatabase();
 	const videoId = req.params.videoId;
 	const commentId = req.params.commentId;
 
@@ -81,7 +73,20 @@ router.delete("/:videoId/comments/:commentId", (req, res) => {
 	res.send(comment);
 });
 
+router.post("/thumbnail", (req, res) => {
+	console.log("started");
+	const bytes = req.body;
+	console.log(bytes);
+	// const path = `./public/images/${uniqid()}.jpg`;
+	// fs.writeFileSync(path, url);
+	console.log("done");
+});
+
 module.exports = router;
+
+function readDatabase() {
+	return JSON.parse(fs.readFileSync(pathToData));
+}
 
 function writeToDatabase(newData) {
 	fs.writeFileSync(pathToData, JSON.stringify(newData));
