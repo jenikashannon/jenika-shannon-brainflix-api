@@ -2,8 +2,21 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const uniqid = require("uniqid");
+const multer = require("multer");
 
 const pathToData = "./data/videos.json";
+
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		cb(null, "./public/images/");
+	},
+	filename: function (req, file, cb) {
+		const fileExt = file.mimetype.split("/")[1];
+		cb(null, `${uniqid()}.${fileExt}`);
+	},
+});
+
+const upload = multer({ storage: storage });
 
 router
 	.route("/")
@@ -91,13 +104,10 @@ router.delete("/:videoId/comments/:commentId", (req, res) => {
 	res.send(comment);
 });
 
-router.post("/thumbnail", (req, res) => {
-	console.log("started");
-	const bytes = req.body;
-	console.log(bytes);
-	// const path = `./public/images/${uniqid()}.jpg`;
-	// fs.writeFileSync(path, url);
-	console.log("done");
+router.post("/thumbnail", upload.single("files"), (req, res) => {
+	const uploadLocation = req.file.path.split("/");
+	const fileName = uploadLocation[uploadLocation.length - 1];
+	res.send(fileName);
 });
 
 module.exports = router;
