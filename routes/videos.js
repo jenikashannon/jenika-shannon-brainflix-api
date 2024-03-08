@@ -110,6 +110,24 @@ router.post("/thumbnail", upload.single("files"), (req, res) => {
 	res.send(fileName);
 });
 
+router.put("/:videoId/likes", (req, res) => {
+	const videos = readDatabase();
+	const videoId = getVideoId(req.params.videoId);
+
+	// find relevant video
+	const videoIndex = videos.findIndex((video) => video.id === videoId);
+	const video = videos[videoIndex];
+
+	let likes = parseFloat(video.likes.replaceAll(",", ""));
+	likes++;
+
+	video.likes = likes.toLocaleString("en-us");
+
+	writeToDatabase(videos);
+
+	res.send(video);
+});
+
 module.exports = router;
 
 function readDatabase() {
