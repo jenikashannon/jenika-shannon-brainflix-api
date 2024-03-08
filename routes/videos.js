@@ -5,10 +5,12 @@ const uniqid = require("uniqid");
 const multer = require("multer");
 
 const pathToData = "./data/videos.json";
+const pathToPublic = "./public/images/";
+const publicUrl = "http://localhost:1700/images/";
 
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
-		cb(null, "./public/images/");
+		cb(null, pathToPublic);
 	},
 	filename: function (req, file, cb) {
 		const fileExt = file.mimetype.split("/")[1];
@@ -104,11 +106,19 @@ router.delete("/:videoId/comments/:commentId", (req, res) => {
 	res.send(comment);
 });
 
-router.post("/thumbnail", upload.single("files"), (req, res) => {
-	const uploadLocation = req.file.path.split("/");
-	const fileName = uploadLocation[uploadLocation.length - 1];
-	res.send(fileName);
-});
+router
+	.route("/thumbnail")
+	.post(upload.single("files"), (req, res) => {
+		const uploadLocation = req.file.path.split("/");
+		const fileName = uploadLocation[uploadLocation.length - 1];
+		res.send(fileName);
+	})
+	.patch((req, res) => {
+		let filePath = req.body.file;
+
+		filePath = filePath.replaceAll(publicUrl, "");
+		fs.unlinkSync(`${pathToPublic}${filePath}`);
+	});
 
 router.put("/:videoId/likes", (req, res) => {
 	const videos = readDatabase();
